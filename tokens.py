@@ -9,9 +9,9 @@ class Token(Enum):
 
 
     def __str__(self):
-        s = "<" + str(self.name) + ": " + str(self.value)
+        s = "<" + str(self.name)
         if hasattr(self, 'data'):
-            return s + ", " + str(self.data) + ">"
+            return s + ": " + str(self.data) + ">"
         return s + ">"
     
 
