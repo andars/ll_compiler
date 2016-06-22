@@ -1,0 +1,4 @@
+yolo + dope
+1+
+    31 + 27
+(define square (lambda (x) (* x x))
