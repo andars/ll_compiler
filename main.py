@@ -1,10 +1,10 @@
-import lex
-import parse
+from lexer import Lexer
+from parser import Parser
 from tokens import Token
 
 print("Lexing:")
 with open('lextest.txt') as f:
-    lexer = lex.Lexer(f)
+    lexer = Lexer(f)
     while True:
         if lexer.peek_token() == Token.EOF:
             break
@@ -12,6 +12,6 @@ with open('lextest.txt') as f:
 
 print("Parsing")
 with open('parsetest.txt') as f:
-    lexer = lex.Lexer(f)
-    parser = parse.Parser(lexer)
-    print(parser.parse_expr())
+    lexer = Lexer(f)
+    parser = Parser(lexer)
+    print(parser.parse())

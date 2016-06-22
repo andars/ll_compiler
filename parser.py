@@ -4,6 +4,12 @@ class Parser:
     def __init__(self, lexer):
         self.lexer = lexer
 
+    def parse(self):
+        expressions = []
+        while self.lexer.peek_token() != Token.EOF:
+            expressions.append(self.parse_expr())
+        return expressions
+
     def parse_expr(self):
         print("parsing expr")
         if self.lexer.peek_token() == Token.EOF:
