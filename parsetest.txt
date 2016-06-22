@@ -1,0 +1,5 @@
+(define square (lambda (x) (* x x)))
+
+(procedure main
+    (alloc 3)
+    (call exit 0))
