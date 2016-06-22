@@ -4,8 +4,20 @@ class Lexer:
     def __init__(self, f):
         self.file = f 
         self.offset = 0
+        self.peeked = None
+
+    def peek_token(self):
+        if self.peeked:
+            return self.peeked
+        self.peeked = self.next_token()
+        return self.peeked
 
     def next_token(self):
+        if self.peeked:
+            tok = self.peeked
+            self.peeked = None
+            return tok
+
         char = self.read_char()
 
         if char == '':
@@ -40,11 +52,13 @@ class Lexer:
             sym += self.read_char()
         return Token.SYMBOL(sym)
 
+    # returns the next char and advances cursor
     def read_char(self):
         char = self.peek_char() 
         self.offset += 1
         return char
     
+    # returns the next char to be read, doesn't advance cursor
     def peek_char(self):
         self.file.seek(self.offset)
         char = self.file.read(1)
