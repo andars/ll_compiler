@@ -11,12 +11,10 @@ class Parser:
         return expressions
 
     def parse_expr(self):
-        print("parsing expr")
         if self.lexer.peek_token() == Token.EOF:
             raise SyntaxError("unexpected EOF")
 
         tok = self.lexer.peek_token()
-        print(tok) 
 
         if tok == Token.OPEN_PAREN:
             self.lexer.next_token() # eat open paren
