@@ -1,3 +1,4 @@
 (procedure main 
     (alloc 3)
-    (return 0))
+    (set (local 0) 5)
+    (return (local 0)))
