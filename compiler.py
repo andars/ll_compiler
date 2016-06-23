@@ -18,11 +18,12 @@ class Compiler:
     def compile_proc(self, expr):
         name = expr[1]
         
+        print(".globl " + name)
         self.output_label(name)
         print("pushq %rbp")
         print("movq %rsp, %rbp")
 
-        body = expr[2:-1] # all remaining subexpressions after (procedure <name> ...
+        body = expr[2:] # all remaining subexpressions after (procedure <name> ...
 
         for expression in body:
             self.compile_expr(expression)
