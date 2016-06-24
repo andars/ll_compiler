@@ -83,9 +83,9 @@ class Compiler:
         elif expr[0] == '-':
             op = 'sub'
 
-        self.compile_value(expr[1]) # place first operand in %rax
+        self.compile_value(expr[2]) # place first operand in %rax
         print("mov %rax, %rbx") # move first operand to %rbx
-        self.compile_value(expr[2]) # place second operand in %rax
+        self.compile_value(expr[1]) # place second operand in %rax
 
         print("{} %rbx, %rax".format(op))
 
