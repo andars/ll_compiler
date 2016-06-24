@@ -24,7 +24,7 @@ class Compiler:
     #compile a (procedure <name> <stmts>) block
     def compile_proc(self, expr):
         name = expr[1]
-        self.enclosing = name
+        self.enclosing = {'name': name, 'count': 0}
         
         print(".globl " + name)
         self.output_label(name)
@@ -46,14 +46,18 @@ class Compiler:
     # compile an (alloc <count>) expression
     def compile_alloc(self, expr):
         assert len(expr) == 2, "bad alloc syntax" # TODO: make sema for this stuff
-        print("sub ${}, %rsp".format(expr[1] * 8))
+        count = expr[1]
+        self.enclosing['count'] += count
+        print("sub ${}, %rsp".format(count * 8))
 
     # compile a (return <value>) expression
     def compile_return(self, expr):
         self.compile_value(expr[1]) # place return value in %rax
-        print("jmp " + self.enclosing + "_end") # jump to function epilogue
+        print("jmp " + self.enclosing['name'] + "_end") # jump to function epilogue
 
     def get_local_addr(self, expr):
+        assert 0 <= expr[1] and expr[1] < self.enclosing['count'], \
+               "bad local index: {}".format(expr[1])
         idx = expr[1] + 1
         offset = idx*8
         return "-" + str(offset) + "(%rbp)"
