@@ -8,18 +8,16 @@ class Compiler:
             self.compile_expr(expr)
 
     def compile_expr(self, expr):
-        if isinstance(expr, int):
-            print("$" + str(expr), end='')
-        elif expr[0] == 'procedure':
+        if expr[0] == 'procedure':
             self.compile_proc(expr)
         elif expr[0] == 'alloc':
             self.compile_alloc(expr)
         elif expr[0] == 'return':
             self.compile_return(expr)
-        elif expr[0] == 'local':
-            self.compile_local(expr)
         elif expr[0] == 'set':
             self.compile_set(expr)
+        elif expr[0] in ['+', '-']:
+            self.compile_operation(expr)
         else:
             assert False, "unimplemented {}".format(expr)
     
@@ -52,24 +50,44 @@ class Compiler:
 
     # compile a (return <value>) expression
     def compile_return(self, expr):
-        print("movq ", end='')
-        self.compile_expr(expr[1])
-        print(", %rax") # place return value in %rax
+        self.compile_value(expr[1]) # place return value in %rax
         print("jmp " + self.enclosing + "_end") # jump to function epilogue
 
-    def compile_local(self, expr):
+    def get_local_addr(self, expr):
         idx = expr[1] + 1
         offset = idx*8
-        print("-" + str(offset) + "(%rbp)", end="")
+        return "-" + str(offset) + "(%rbp)"
 
     def compile_set(self, expr):
         dst = expr[1]
-        print("movq ", end='')
-        self.compile_expr(expr[2])
-        print(", ", end='')
-        self.compile_expr(dst)
-        print()
+        assert isinstance(dst, list) and dst[0] == 'local', "can only assign to variable"
+        value = expr[2]
+        self.compile_value(expr[2])
+        print("mov %rax, " + self.get_local_addr(dst))
 
+    # loads value indicated by expr into %rax
+    def compile_value(self, expr):
+        if isinstance(expr, int):
+            print("mov $" + str(expr) + ", %rax")
+        else:
+            assert isinstance(expr, list), "unexpected value type {}".format(expr)
+            if expr[0] == 'local':
+                print("mov " + self.get_local_addr(expr) + ", %rax")
+            else:
+                self.compile_expr(expr)
+
+    def compile_operation(self, expr):
+        op = ''
+        if expr[0] == '+':
+            op = 'add'
+        elif expr[0] == '-':
+            op = 'sub'
+
+        self.compile_value(expr[1]) # place first operand in %rax
+        print("mov %rax, %rbx") # move first operand to %rbx
+        self.compile_value(expr[2]) # place second operand in %rax
+
+        print("{} %rbx, %rax".format(op))
 
     def output_label(self, label):
         print("{}:".format(label))
