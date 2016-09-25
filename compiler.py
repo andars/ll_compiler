@@ -54,7 +54,7 @@ class Compiler:
 
     # compile a (return <value>) expression
     def compile_return(self, expr):
-        self.compile_value(expr[1]) # place return value in %rax
+        self.compile_value(expr[1], '%rax') # place return value in %rax
         print("jmp " + self.enclosing['name'] + "_end") # jump to function epilogue
 
     def get_local_addr(self, expr):
@@ -68,17 +68,17 @@ class Compiler:
         dst = expr[1]
         assert isinstance(dst, list) and dst[0] == 'local', "can only assign to variable"
         value = expr[2]
-        self.compile_value(expr[2])
+        self.compile_value(expr[2], '%rax')
         print("mov %rax, " + self.get_local_addr(dst))
 
-    # loads value indicated by expr into %rax
-    def compile_value(self, expr):
+    # loads value indicated by expr into dest
+    def compile_value(self, expr, dest):
         if isinstance(expr, int):
-            print("mov $" + str(expr) + ", %rax")
+            print("mov $" + str(expr) + ", " + dest)
         else:
             assert isinstance(expr, list), "unexpected value type {}".format(expr)
             if expr[0] == 'local':
-                print("mov " + self.get_local_addr(expr) + ", %rax")
+                print("mov " + self.get_local_addr(expr) + ", " + dest)
             else:
                 self.compile_expr(expr)
 
@@ -89,9 +89,8 @@ class Compiler:
         elif expr[0] == '-':
             op = 'sub'
 
-        self.compile_value(expr[2]) # place first operand in %rax
-        print("mov %rax, %rbx") # move first operand to %rbx
-        self.compile_value(expr[1]) # place second operand in %rax
+        self.compile_value(expr[2], '%rbx') # place first operand in %rax
+        self.compile_value(expr[1], '%rax') # place second operand in %rax
 
         print("{} %rbx, %rax".format(op))
 
