@@ -4,6 +4,8 @@ class Compiler:
         self.enclosing = None
 
     def compile(self):
+        with open('start.s', 'r') as start_file:
+            print(start_file.read())
         for expr in self.parsed:
             self.compile_expr(expr)
 
