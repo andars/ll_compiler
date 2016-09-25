@@ -20,6 +20,8 @@ class Compiler:
             self.compile_set(expr)
         elif expr[0] in ['+', '-']:
             self.compile_operation(expr)
+        elif expr[0] == 'call':
+            self.compile_call(expr)
         else:
             assert False, "unimplemented {}".format(expr)
     
@@ -41,7 +43,7 @@ class Compiler:
         self.output_label(name + "_end")
         print("mov %rbp, %rsp")
         print("pop %rbp")
-        print("ret")
+        print("ret\n")
 
         self.enclosing = None
 
@@ -93,6 +95,11 @@ class Compiler:
         self.compile_value(expr[1], '%rax') # place second operand in %rax
 
         print("{} %rbx, %rax".format(op))
+
+    #compile (call <name>). no args yet
+    def compile_call(self, expr):
+        proc = expr[1]
+        print("callq {}".format(proc))
 
     def output_label(self, label):
         print("{}:".format(label))
