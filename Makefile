@@ -5,8 +5,8 @@ build/test: build/test.s
 	as $? -o $@.o
 	ld $@.o -o $@
 
-build/test.s: *.py test.txt
-	./compile.py > build/test.s
+build/test.s: test.txt *.py
+	./compile.py $< > build/test.s
 
 clean:
 	rm build/*
