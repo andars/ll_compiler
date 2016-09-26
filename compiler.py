@@ -96,9 +96,13 @@ class Compiler:
 
         print("{} %rbx, %rax".format(op))
 
-    #compile (call <name>). no args yet
+    #compile (call <name> <args>) 
     def compile_call(self, expr):
         proc = expr[1]
+        args = expr[2]
+        registers = ["%rdi", "%rsi", "%rdx"]
+        for arg, reg in zip(args, registers):
+            self.compile_value(arg, reg)
         print("callq {}".format(proc))
 
     def output_label(self, label):
