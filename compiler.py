@@ -117,11 +117,18 @@ class Compiler:
         proc = expr[1]
         args = expr[2]
 
-        #TODO: push all the registers we need (esp. current function's arguments) to stack
+        #TODO: push *only* the registers we need to stack
+        # this is pretty bad but temporarily solves the problem 
+        for reg in self.registers:
+            print("pushq " + reg)
 
         for arg, reg in zip(args, self.registers):
             self.compile_value(arg, reg)
         print("callq {}".format(proc))
+
+        # go back through registers and pop them off (in reverse)
+        for reg in reversed(self.registers):
+            print("popq " + reg)
 
     def output_label(self, label):
         print("{}:".format(label))
