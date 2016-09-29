@@ -10,7 +10,7 @@ class Compiler:
         for expr in self.parsed:
             self.compile_expr(expr)
 
-    def compile_expr(self, expr, dest):
+    def compile_expr(self, expr):
         if expr[0] == 'procedure':
             self.compile_proc(expr)
         elif expr[0] == 'alloc':
@@ -31,7 +31,7 @@ class Compiler:
     #compile a (procedure <name> <stmts>) block
     def compile_proc(self, expr):
         name = expr[1]
-        param_count = expr[2] #TODO: store arguments in pseudo-local vars
+        param_count = expr[2]
 
         self.enclosing = {
             'name': name,
@@ -42,15 +42,25 @@ class Compiler:
 
         print(".globl " + name)
         self.output_label(name)
+
+        # function prologue
         print("pushq %rbp")
         print("movq %rsp, %rbp")
+
+        # allocate stack space for arguments & put them there
+        print("subq ${}, %rsp".format(param_count * 8))
+        for i in range(param_count):
+            print("movq {}, {}".format(self.registers[i], self.get_param_addr(i)))
 
         body = expr[3:] # all remaining subexpressions after (procedure <name> <arg_count>...
 
         for expression in body:
             self.compile_expr(expression)
 
+        # put a label at the end of the body, used for early returns
         self.output_label(name + "_end")
+
+        # function epilogue
         print("mov %rbp, %rsp")
         print("pop %rbp")
         print("ret\n")
@@ -69,26 +79,26 @@ class Compiler:
         self.compile_value(expr[1], '%rax') # place return value in %rax
         print("jmp " + self.enclosing['name'] + "_end") # jump to function epilogue
 
-    def get_local_addr(self, expr):
-        assert 0 <= expr[1] and expr[1] < self.enclosing['local_count'], \
-               "bad local index: {}".format(expr[1])
-        idx = expr[1] + 1
+    def get_local_addr(self, local_number):
+        assert 0 <= local_number and local_number < self.enclosing['local_count'], \
+               "bad local index: {}".format(local_number)
+        idx = local_number + 1 + self.enclosing['param_count']
         offset = idx*8
         return "-" + str(offset) + "(%rbp)"
 
-    def get_param_location(self, expr):
-        param_number = expr[1]
+    def get_param_addr(self, param_number):
         assert 0 <= param_number and param_number < self.enclosing['param_count'], \
                 "bad param index: {}".format(param_number)
-        reg = self.registers[param_number]
-        return reg
+        idx = param_number + 1
+        offset = idx * 8
+        return "-" + str(offset) + "(%rbp)"
 
     def compile_set(self, expr):
         dst = expr[1]
         assert isinstance(dst, list) and dst[0] == 'local', "can only assign to variable"
         value = expr[2]
         self.compile_value(expr[2], '%rax')
-        print("mov %rax, " + self.get_local_addr(dst))
+        print("mov %rax, " + self.get_local_addr(dst[1]))
 
     # loads value indicated by expr into dest
     def compile_value(self, expr, dest):
@@ -97,13 +107,13 @@ class Compiler:
         else:
             assert isinstance(expr, list), "unexpected value type {}".format(expr)
             if expr[0] == 'local':
-                print("mov " + self.get_local_addr(expr) + ", " + dest)
+                print("mov " + self.get_local_addr(expr[1]) + ", " + dest)
             elif expr[0] == 'param':
-                print("mov " + self.get_param_location(expr) + ", " + dest)
+                print("mov " + self.get_param_addr(expr[1]) + ", " + dest)
             else:
-                self.compile_expr(expr, dest)
+                self.compile_expr(expr)
+                print("mov %rax, {}".format(dest))
 
-    # TODO: pass destination register as param
     def compile_operation(self, expr):
         op = ''
         if expr[0] == '+':
