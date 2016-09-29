@@ -10,9 +10,7 @@ class Compiler:
         for expr in self.parsed:
             self.compile_expr(expr)
 
-    #TODO: add conditional
-
-    def compile_expr(self, expr):
+    def compile_expr(self, expr, dest):
         if expr[0] == 'procedure':
             self.compile_proc(expr)
         elif expr[0] == 'alloc':
@@ -25,18 +23,21 @@ class Compiler:
             self.compile_operation(expr)
         elif expr[0] == 'call':
             self.compile_call(expr)
+        elif expr[0] == 'if':
+            self.compile_if(expr)
         else:
             assert False, "unimplemented {}".format(expr)
     
     #compile a (procedure <name> <stmts>) block
     def compile_proc(self, expr):
         name = expr[1]
-        param_count = expr[2]
+        param_count = expr[2] #TODO: store arguments in pseudo-local vars
 
         self.enclosing = {
             'name': name,
             'local_count': 0,
-            'param_count' : param_count,
+            'param_count': param_count,
+            'label_count': 0,
         }
 
         print(".globl " + name)
@@ -44,7 +45,7 @@ class Compiler:
         print("pushq %rbp")
         print("movq %rsp, %rbp")
 
-        body = expr[3:] # all remaining subexpressions after (procedure <name> ...
+        body = expr[3:] # all remaining subexpressions after (procedure <name> <arg_count>...
 
         for expression in body:
             self.compile_expr(expression)
@@ -100,8 +101,9 @@ class Compiler:
             elif expr[0] == 'param':
                 print("mov " + self.get_param_location(expr) + ", " + dest)
             else:
-                self.compile_expr(expr)
+                self.compile_expr(expr, dest)
 
+    # TODO: pass destination register as param
     def compile_operation(self, expr):
         op = ''
         if expr[0] == '+':
@@ -131,6 +133,28 @@ class Compiler:
         # go back through registers and pop them off (in reverse)
         for reg in reversed(self.registers):
             print("popq " + reg)
+
+    def compile_if(self, expr):
+        cond = expr[1]
+        if_branch = expr[2]
+        else_branch = expr[3]
+
+        else_label = "{}_{}_else".format(self.enclosing['name'], self.enclosing['label_count'])
+        end_label = "{}_{}_end".format(self.enclosing['name'], self.enclosing['label_count'])
+
+        self.compile_value(cond, '%rax')
+        print("test %rax, %rax") # test condition
+        print("je {}".format(else_label)) # if condition = 0, jump to else branch
+        for expr in if_branch:
+            self.compile_expr(expr)
+
+        print("jmp {}".format(end_label))
+
+        self.output_label(else_label)
+        for expr in else_branch:
+            self.compile_expr(expr)
+
+        self.output_label(end_label)
 
     def output_label(self, label):
         print("{}:".format(label))
