@@ -16,6 +16,7 @@ class Parser:
 
         tok = self.lexer.peek_token()
 
+        #TODO: allow square brackets in place of parens?
         if tok == Token.OPEN_PAREN:
             self.lexer.next_token() # eat open paren
             tok_list = []

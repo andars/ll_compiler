@@ -10,6 +10,8 @@ class Compiler:
         for expr in self.parsed:
             self.compile_expr(expr)
 
+    #TODO: add conditional
+
     def compile_expr(self, expr):
         if expr[0] == 'procedure':
             self.compile_proc(expr)
