@@ -26,6 +26,11 @@ class Lexer:
         if char == ' ' or char == '\n' or char == '\t':
             return self.next_token()
 
+        if char == '#':
+            while self.read_char() != '\n':
+                pass
+            return self.next_token()
+
         if char == '(':
             return Token.OPEN_PAREN
         elif char == ')':
