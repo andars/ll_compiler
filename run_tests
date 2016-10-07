@@ -19,7 +19,8 @@ for test in tests/*.src; do
     if [ -f $program ]; then
         echo "Found corresponding executable $program"
     else
-        echo "Corresponding executable not found"
+        echo -e "${RED}ERROR:${NC} Corresponding executable not found"
+        echo " Run through \`make test\`"
         exit 1
     fi
 
