@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+# flag to determine whether any test failed
+flag=0
+
+echo -e "\nRUNNING TESTS \n"
+
+for test in tests/*.src; do
+    echo "Running $test"
+    expected=$(cat $test | sed -n "s/# EXPECT: \([0-9]*\)/\1/p")
+    filename=${test##*/}
+    program=build/${filename%.*}
+
+    # check to make sure the program exists
+    if [ -f $program ]; then
+        echo "Found corresponding executable $program"
+    else
+        echo "Corresponding executable not found"
+        exit 1
+    fi
+
+    # execute the program and store the exit code
+    $(./$program)
+    status_code=$?
+
+    # check that the exit code was what we expected
+    if [ $status_code -eq $expected ]; then
+        echo -e "${GREEN}TEST PASSED:${NC} expected $expected, got $status_code"
+    else
+        echo -e "${RED}TEST FAILED:${NC} expected $expected, but got $status_code"
+        flag=1
+    fi
+done
+
+if [ $flag -eq 0 ]; then
+    echo -e "${GREEN}ALL TESTS PASSED!${NC}"
+else
+    echo -e "${RED}SOME TESTS FAILED${NC}. See above for details"
+fi

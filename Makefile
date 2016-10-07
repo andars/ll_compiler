@@ -1,12 +1,20 @@
-.PHONY: run
-run: build/test
-	@./run $?
-build/test: build/test.s
+export PATH := .:$(PATH)
+
+SRCS := $(wildcard tests/*)
+PROGS := $(SRCS:tests/%=build/%)
+PROGS := $(PROGS:%.src=%)
+
+.PHONY: test
+test: $(PROGS)
+	@run_tests
+
+build/%: build/%.s
 	as $? -o $@.o
 	ld $@.o -o $@
 
-build/test.s: test.txt *.py
-	./compile.py $< > build/test.s
+build/%.s: tests/%.src *.py
+	./compile.py $< > $@
 
+.PHONY: clean
 clean:
 	rm build/*
