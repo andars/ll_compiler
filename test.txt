@@ -1,7 +1,0 @@
-(procedure main 
-    (alloc 3)
-    (set (local 0) 5)
-    (set (local 1) (local 0))
-    (set (local 2) (local 1))
-    (set (local 2) (+ 4 8))
-    (return (local 2)))
