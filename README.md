@@ -23,7 +23,7 @@ First argument to `fib` is index
 
 ### Another Example
 
-It takes this as input (lots of parens, but *not* lisp):
+It takes this as input (lots of parens, but *not* currently a lisp):
 
 ```
 (procedure foo 1
