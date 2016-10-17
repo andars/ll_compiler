@@ -11,7 +11,7 @@ class Compiler:
             self.compile_expr(expr)
 
     def compile_expr(self, expr):
-        if expr[0] == 'procedure':
+        if expr[0] == 'define':
             self.compile_proc(expr)
         elif expr[0] == 'alloc':
             self.compile_alloc(expr)
@@ -28,10 +28,10 @@ class Compiler:
         else:
             assert False, "unimplemented {}".format(expr)
     
-    #compile a (procedure <name> <stmts>) block
+    # compile a (define (<name> <param_count>) <stmts>) block
     def compile_proc(self, expr):
-        name = expr[1]
-        param_count = expr[2]
+        name = expr[1][0]
+        param_count = expr[1][1]
 
         self.enclosing = {
             'name': name,
@@ -52,7 +52,7 @@ class Compiler:
         for i in range(param_count):
             print("movq {}, {}".format(self.registers[i], self.get_param_addr(i)))
 
-        body = expr[3:] # all remaining subexpressions after (procedure <name> <arg_count>...
+        body = expr[2:] # all remaining subexpressions after (procedure <name> <arg_count>...
 
         for expression in body:
             self.compile_expr(expression)
