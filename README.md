@@ -10,15 +10,15 @@ This project is a exploratory compiler.
 First argument to `fib` is index
 
 ```
-(procedure fib 3
+(define (fib 3)
     (if (param 0)
         ((return (call fib ((- (param 0) 1) (param 2) (+ (param 1) (param 2))))))
         ((return (param 1)))))
 
-(procedure main 0
+(define (main 0)
     (alloc 2)
     (set (local 0) 0)
-    (return (call fib (10 1 1))))
+    (return (call fib (5 1 1))))
 ```
 
 ### Another Example
@@ -26,11 +26,11 @@ First argument to `fib` is index
 It takes this as input (lots of parens, but *not* currently a lisp):
 
 ```
-(procedure foo 1
+(define (foo 1)
     (alloc 1)
     (return (param 0)))
 
-(procedure main 0
+(define (main 0)
     (alloc 3)
     (set (local 0) (+ 5 2) )
     (set (local 1) (local 0))
