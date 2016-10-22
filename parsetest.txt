@@ -1,3 +1,0 @@
-(procedure main
-    (alloc 3)
-    (call exit 0))
