@@ -132,8 +132,8 @@ class CodeGenerator():
 
     @when(Call)
     def codegen(self, node):
-        for register in self.registers:
-            self.emit("pushq {}".format(register))
+        for i in range(len(node.arguments)):
+            self.emit("pushq {}".format(self.registers[i]))
 
         for arg, reg in zip(node.arguments, self.registers):
             self.codegen(arg)
@@ -141,8 +141,8 @@ class CodeGenerator():
 
         self.emit("callq {}".format(node.procedure))
 
-        for register in reversed(self.registers):
-            self.emit("popq {}".format(register))
+        for i in reversed(range(len(node.arguments))):
+            self.emit("popq {}".format(self.registers[i]))
 
     @when(int)
     def codegen(self, node):
