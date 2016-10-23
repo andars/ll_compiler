@@ -45,8 +45,6 @@ class Parser:
                     node = self.parse_conditional()
                 elif peeked.data == 'return':
                     node = self.parse_return()
-                elif peeked.data == 'call':
-                    node = self.parse_call()
                 else:
                     node = self.parse_binop()
 
@@ -118,16 +116,15 @@ class Parser:
 
     def parse_binop(self):
         operator = self.parse_atom()
-        lhs = self.parse_expr()
-        rhs = self.parse_expr()
-        return BinOp(operator, lhs, rhs)
-
-    def parse_call(self):
-        self.expect('call') # eat `call`
-        procedure = self.parse_atom()
-        args = []
-        self.lexer.next_token()
-        while self.lexer.peek_token() != Token.CLOSE_PAREN:
-            args.append(self.parse_expr())
-        self.lexer.next_token() # eat close paren
-        return Call(procedure, args)
+        
+        if operator in ['+', '-']:
+            lhs = self.parse_expr()
+            rhs = self.parse_expr()
+            return BinOp(operator, lhs, rhs)
+        else:
+            args = []
+            self.lexer.next_token()
+            while self.lexer.peek_token() != Token.CLOSE_PAREN:
+                args.append(self.parse_expr())
+            self.lexer.next_token() # eat close paren
+            return Call(operator, args)
