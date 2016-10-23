@@ -10,18 +10,21 @@ This project is a exploratory compiler.
 First argument to `fib` is index
 
 ```
-(define (fib 3)
+(define (fib_helper 3)
     (if (param 0)
-        ((return (call fib ((- (param 0) 1) (param 2) (+ (param 1) (param 2))))))
+        ((return (fib_helper (- (param 0) 1) (param 2) (+ (param 1) (param 2)))))
         ((return (param 1)))))
+
+(define (fib 1)
+    (return (fib_helper (param 0) 1 1)))
 
 (define (main 0)
     (alloc 2)
     (set (local 0) 0)
-    (return (call fib (5 1 1))))
+    (return (fib 5)))
 ```
 
-### Another Example
+### An (Out of Date) Example
 
 It takes this as input (lots of parens, but *not* currently a lisp):
 
