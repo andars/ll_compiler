@@ -123,8 +123,6 @@ class Parser:
             return BinOp(operator, lhs, rhs)
         else:
             args = []
-            self.lexer.next_token()
             while self.lexer.peek_token() != Token.CLOSE_PAREN:
                 args.append(self.parse_expr())
-            self.lexer.next_token() # eat close paren
             return Call(operator, args)

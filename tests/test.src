@@ -3,10 +3,10 @@
 
 (define (fib 3)
     (if (param 0)
-        ((return (fib ((- (param 0) 1) (param 2) (+ (param 1) (param 2))))))
+        ((return (fib (- (param 0) 1) (param 2) (+ (param 1) (param 2)))))
         ((return (param 1)))))
 
 (define (main 0)
     (alloc 2)
     (set (local 0) 0)
-    (return (fib (5 1 1))))
+    (return (fib 5 1 1)))

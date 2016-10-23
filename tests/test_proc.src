@@ -1,7 +1,7 @@
 # EXPECT: 4
 (define (foo 1)
     (alloc 1)
-    (set (local 0) (bar (2)))
+    (set (local 0) (bar 2))
     (return (local 0)))
 
 (define (bar 1)
@@ -14,7 +14,7 @@
     (set (local 1) (local 0))
     (set (local 2) (local 1))
     (set (local 2) (+ (local 1) 1))
-    (set (local 0) (foo (27)))
-    (set (local 1) (foo (28)))
+    (set (local 0) (foo 27))
+    (set (local 1) (foo 28))
     (set (local 1) (+ (local 0) (local 1)))
     (return (local 1)))
