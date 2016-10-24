@@ -7,4 +7,4 @@ from ast.procedure import *
 from ast.ret import *
 from ast.call import *
 from ast.alloc import *
-
+from ast.gvar import *

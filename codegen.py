@@ -35,8 +35,9 @@ class CodeGenerator():
     def emit(self, *args, **kwargs):
         print(*args, file=self.buffer, **kwargs)
 
-    def emit_label(self, label):
-        self.enclosing['label_count'] += 1
+    def emit_label(self, label, track=True):
+        if track:
+            self.enclosing['label_count'] += 1
         self.emit("{}:".format(label))
 
     @when(BinOp)
@@ -86,8 +87,12 @@ class CodeGenerator():
 
     @when(VarRef)
     def codegen(self, node):
-        address = self.address(node)
-        self.emit("movq {}, %rax # variable".format(address))
+        if node.vartype in ['local','param']:
+            address = self.address(node)
+            self.emit("movq {}, %rax # variable".format(address))
+        else:
+            label = node.name
+            self.emit("movq {}(%rip), %rax # global".format(label))
 
     @when(Alloc)
     def codegen(self, node):
@@ -154,3 +159,10 @@ class CodeGenerator():
         elif node.vartype == "param":
             offset = node.index + 1
         return "-{}(%rbp)".format(offset*8)
+
+    @when(Global)
+    def codegen(self, node):
+        self.emit(".data") # switch to data section
+        self.emit_label(node.name, False)
+        self.emit('.quad {}'.format(node.value))
+        self.emit(".text") # switch back to text section

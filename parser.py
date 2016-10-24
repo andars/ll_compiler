@@ -34,12 +34,12 @@ class Parser:
 
             if peeked == Token.SYMBOL:
                 if peeked.data == 'define':
-                    node = self.parse_procedure()
+                    node = self.parse_define()
                 elif peeked.data == 'set':
                     node = self.parse_assignment()
                 elif peeked.data == 'alloc':
                     node = self.parse_alloc()
-                elif peeked.data == 'param' or peeked.data == 'local':
+                elif peeked.data in ['param','local','global']:
                     node = self.parse_varref()
                 elif peeked.data == 'if':
                     node = self.parse_conditional()
@@ -62,8 +62,23 @@ class Parser:
             return self.lexer.next_token().data
         raise SyntaxError("unexpected atom" + str(self.lexer.peek_token()))
 
-    def parse_procedure(self):
+    def parse_define(self):
         self.expect('define') # eat `define`
+
+        # (define (<proc> <nargs>)); procedure
+        if self.lexer.peek_token() == Token.OPEN_PAREN:
+            return self.parse_procedure()
+
+        # (define <var> <value>); global var
+        name = self.parse_atom()
+        value = self.parse_expr()
+
+        if not isinstance(value, int):
+            raise SyntaxError("expressions in globals not yet supported")
+
+        return Global(name, value)
+
+    def parse_procedure(self):
         self.lexer.next_token() # eat open paren
         name = self.parse_atom()
         params = self.parse_atom()
@@ -88,7 +103,7 @@ class Parser:
 
     def parse_varref(self):
         vartype = self.parse_atom() # `param` or `local`
-        idx = self.parse_atom()
+        idx = self.parse_atom() # could also be a name for a global
         return VarRef(vartype, idx)
 
     def parse_conditional(self):
